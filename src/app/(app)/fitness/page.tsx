@@ -3,7 +3,12 @@ import { isValidISODate, todayISO } from "@/lib/date";
 import DateNav from "@/components/DateNav";
 import AddFitnessEntry from "./AddFitnessEntry";
 import FitnessEntryRow from "./FitnessEntryRow";
+import QuickAddFitness from "./QuickAddFitness";
+import { PRESET_EXERCISES } from "./presetExercises";
 import type { FitnessLogRow } from "./types";
+
+const FITNESS_LOG_COLUMNS =
+  "id, logged_date, activity, duration_min, calories_burned, sets, reps, weight_kg, distance_km, note, created_at";
 
 export default async function FitnessPage({
   searchParams,
@@ -17,11 +22,26 @@ export default async function FitnessPage({
 
   const { data: entries } = await supabase
     .from("fitness_logs")
-    .select(
-      "id, logged_date, activity, duration_min, calories_burned, sets, reps, weight_kg, distance_km, note, created_at"
-    )
+    .select(FITNESS_LOG_COLUMNS)
     .eq("logged_date", date)
     .order("created_at", { ascending: true });
+
+  const historyResults = await Promise.all(
+    PRESET_EXERCISES.map((activity) =>
+      supabase
+        .from("fitness_logs")
+        .select(FITNESS_LOG_COLUMNS)
+        .eq("activity", activity)
+        .order("logged_date", { ascending: false })
+        .order("created_at", { ascending: false })
+        .limit(3)
+    )
+  );
+
+  const historyByActivity: Record<string, FitnessLogRow[]> = {};
+  PRESET_EXERCISES.forEach((activity, i) => {
+    historyByActivity[activity] = (historyResults[i].data ?? []) as FitnessLogRow[];
+  });
 
   const rows = (entries ?? []) as FitnessLogRow[];
   const totalDuration = rows.reduce((sum, r) => sum + (r.duration_min ?? 0), 0);
@@ -39,6 +59,8 @@ export default async function FitnessPage({
           <Stat label="Verbrannt" value={`${round(totalCalories)}`} unit="kcal" />
         </div>
       </section>
+
+      <QuickAddFitness loggedDate={date} historyByActivity={historyByActivity} />
 
       <AddFitnessEntry loggedDate={date} />
 

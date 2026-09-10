@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import type { FitnessLogRow } from "./types";
 import { deleteFitnessEntry, updateFitnessEntry } from "./actions";
+import { formatEntrySummary } from "./format";
 
 export default function FitnessEntryRow({ entry }: { entry: FitnessLogRow }) {
   const [editing, setEditing] = useState(false);
@@ -88,17 +89,7 @@ export default function FitnessEntryRow({ entry }: { entry: FitnessLogRow }) {
     <li className="py-3 flex items-center justify-between gap-3">
       <div className="min-w-0">
         <p className="text-sm font-medium truncate">{entry.activity}</p>
-        <p className="text-xs text-black/50 dark:text-white/50">
-          {[
-            entry.duration_min != null && `${entry.duration_min} min`,
-            entry.calories_burned != null && `${entry.calories_burned} kcal`,
-            entry.distance_km != null && `${entry.distance_km} km`,
-            entry.sets != null && entry.reps != null && `${entry.sets}×${entry.reps}`,
-            entry.weight_kg != null && `${entry.weight_kg} kg`,
-          ]
-            .filter(Boolean)
-            .join(" · ") || "Keine Details"}
-        </p>
+        <p className="text-xs text-black/50 dark:text-white/50">{formatEntrySummary(entry)}</p>
       </div>
       <div className="flex gap-3 text-xs shrink-0">
         <button onClick={() => setEditing(true)} className="underline underline-offset-2">
