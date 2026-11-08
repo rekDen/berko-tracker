@@ -6,9 +6,14 @@ import { addDaysISO, formatDateDisplay, todayISO } from "@/lib/date";
 export default function DateNav({
   date,
   basePath,
+  prevEntryDate,
+  nextEntryDate,
 }: {
   date: string;
   basePath: string;
+  /** Optional: nächster früherer/späterer Tag mit Einträgen; blendet Sprung-Buttons ein. */
+  prevEntryDate?: string | null;
+  nextEntryDate?: string | null;
 }) {
   const router = useRouter();
 
@@ -16,7 +21,12 @@ export default function DateNav({
     router.push(`${basePath}?date=${newDate}`);
   }
 
+  const showEntryJump = prevEntryDate !== undefined || nextEntryDate !== undefined;
+  const jumpClass =
+    "rounded-md border border-black/15 dark:border-white/15 px-3 py-1.5 text-xs disabled:opacity-40";
+
   return (
+    <div className="flex flex-col gap-2">
     <div className="flex items-center justify-between gap-2">
       <button
         type="button"
@@ -46,6 +56,27 @@ export default function DateNav({
       >
         →
       </button>
+    </div>
+      {showEntryJump && (
+        <div className="flex items-center justify-between gap-2">
+          <button
+            type="button"
+            disabled={!prevEntryDate}
+            onClick={() => prevEntryDate && go(prevEntryDate)}
+            className={jumpClass}
+          >
+            ← Letzter Trainingstag
+          </button>
+          <button
+            type="button"
+            disabled={!nextEntryDate}
+            onClick={() => nextEntryDate && go(nextEntryDate)}
+            className={jumpClass}
+          >
+            Nächster Trainingstag →
+          </button>
+        </div>
+      )}
     </div>
   );
 }

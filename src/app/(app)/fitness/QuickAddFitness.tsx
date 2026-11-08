@@ -50,6 +50,7 @@ function QuickAddCard({
     sets: latest?.sets?.toString() ?? "",
     reps: latest?.reps?.toString() ?? "",
     weightKg: latest?.weight_kg?.toString() ?? "",
+    note: "",
   });
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -69,7 +70,7 @@ function QuickAddCard({
           reps: toNumberOrNull(form.reps),
           weightKg: toNumberOrNull(form.weightKg),
           distanceKm: toNumberOrNull(form.distanceKm),
-          note: null,
+          note: form.note.trim() || null,
         });
         setDone(true);
       } catch (err) {
@@ -90,6 +91,7 @@ function QuickAddCard({
           {entries.map((entry) => (
             <li key={entry.id}>
               {formatShortDate(entry.logged_date)} · {formatEntrySummary(entry)}
+              {entry.note && <span className="italic"> · „{entry.note}“</span>}
             </li>
           ))}
         </ul>
@@ -103,6 +105,17 @@ function QuickAddCard({
         <MiniField label="Wdh." value={form.reps} onChange={(v) => setForm((f) => ({ ...f, reps: v }))} />
         <MiniField label="Gewicht" value={form.weightKg} onChange={(v) => setForm((f) => ({ ...f, weightKg: v }))} />
       </div>
+
+      <label className="mt-2 flex flex-col gap-1 text-[10px] font-medium text-black/60 dark:text-white/60">
+        Notiz
+        <input
+          type="text"
+          value={form.note}
+          onChange={(e) => setForm((f) => ({ ...f, note: e.target.value }))}
+          placeholder="Optional"
+          className="w-full rounded-md border border-black/15 dark:border-white/15 bg-transparent px-2 py-1 text-sm outline-none focus:border-black/40 dark:focus:border-white/40"
+        />
+      </label>
 
       {error && <p className="text-xs text-red-600 dark:text-red-400 mt-2">{error}</p>}
 
